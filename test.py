@@ -1,18 +1,19 @@
 from flask import Flask, request, redirect
-import twilio.twiml
+from twilio import twiml
 from twilio.rest import TwilioRestClient
 import wikipedia
 import wikia
-import requests
-import time
 
-ACC_SID = "ACed1b65ad317350e920c04725943333fc"#CHECK YOUR LIVE ACC_SID
-AUTH_TOKEN = "068a74b108b5690c634b8e03e4e6d577"#CHECK YOUR LIVE AUTH_TOKEN
-PHONE_NUMBER = "+19177460878" #YOUR NUMBER
+ACC_SID = "AC238972a7fc7248f34ba8c582cab28719"#CHECK YOUR LIVE ACC_SID
+AUTH_TOKEN = "0f7a5a8777245c2cfa5f689e35cc369c"#CHECK YOUR LIVE AUTH_TOKEN
+PHONE_NUMBER = "+18722100008" #YOUR NUMBER
 
 ERROR = "Ambiguous query. Please use the search command if you cannot find your query."
 
 app = Flask(__name__)
+
+#Please don't kill me for this
+resp = twiml.Response()
 
 # Named oddly so that functions don't conflict
 def wiki_pedia(context, query):
@@ -46,11 +47,26 @@ def wiki_pedia(context, query):
             message = wikipedia.page(query).section(sec_list[sec_num])
         except:
             message = ERROR
-    elif( context.lower() == "content" ):
+    elif( context.lower() == "full" ):
         try:
             message = wikipedia.page(query).content
         except:
             message = ERROR
+    elif( context.lower() == "image" ):
+        try:
+            x = ""
+            img_list = wikipedia.page(query).images
+            # Removing first letter to remove capital because wikipedia
+            # is anal about uppercase and lowercase
+            for i, x in enumerate(img_list):
+                if query[1:] in x:
+                    break
+            if x == "":
+                message = "Image could not be found."
+            else:
+                resp.message().media(x)
+        except:
+            ERROR
     elif( context.lower() == "url" ):
         try:
             message = wikipedia.page(query).url
@@ -95,11 +111,26 @@ def wiki_a(wiki, context, query):
                 message = "Unable to grab the section text."
         except:
             message = ERROR
-    elif( context.lower() == "content" ):
+    elif( context.lower() == "full" ):
         try:
             message = wikia.page(wiki, query).content
         except:
             message = ERROR
+    elif( context.lower() == "image" ):
+        try:
+            x = ""
+            img_list = wikipedia.page(query).images
+            # Removing first letter to remove capital because wikipedia
+            # is anal about uppercase and lowercase
+            for i, x in enumerate(img_list):
+                if query[1:] in x:
+                    break
+            if x == "":
+                message = "Image could not be found."
+            else:
+                resp.message().media(x)
+        except:
+            ERROR
     elif( context.lower() == "url" ):
         try:
             message = wikia.page(wiki, query).url
@@ -113,15 +144,14 @@ def wiki_a(wiki, context, query):
 @app.route("/", methods=['GET', 'POST'])
 def get_wiki():
     sent_message = request.values.get('Body', None)
-    resp = twilio.twiml.Response()
-    print("initializing")
+
     # Initialize
     args = sent_message.split(" ",2);
     wiki = args[0]
     context = ""
     query = ""
     message = ""
-   
+
     # If the user only types one word, this catches it and won't break the script
     if( len(args) > 1 ):
         context = args[1]
@@ -156,6 +186,7 @@ Please note that text over 1000 characters will be split into multiple messages.
             message = wiki_a(wiki, context, query)
         except:
             message = "Invalid wiki. Type '?' for help."
+
     #client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
     # Cuts messages so that they don't exceel twilio MMS 1600 character limit.
     i = 0
