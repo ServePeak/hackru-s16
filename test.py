@@ -6,27 +6,37 @@ app = Flask(__name__)
  
 @app.route("/", methods=['GET', 'POST'])
 def get_wiki():
-    """Respond and greet the caller by name."""
     sent_message = request.values.get('Body', None)
-    args = sent_message.split(" ",1);
-    if (args[0].lower() == "search"):
-        result = wikipedia.search(args[1])
-        message = '\n'.join(result)
-    #need to send over 150chars
-    elif (args[0].lower() == "content"):
-        message = wikipedia.page(args[1]).content
-    elif (args[0].lower() == "url"):
-        page = wikipedia.page(args[1])
-        message = page.url
-    else:
-        #default sends back summary of the search
-		message = wikipedia.summary(sent_message)
-	
-	#message to send back
-    #message = wiki.url
-    
     resp = twilio.twiml.Response()
-    resp.message(message)
+    
+    args = sent_message.split(" ",1);
+    context = args[0]
+    query = ""
+    message = ""
+    if( len(args) != 1 ):
+        query = args[1]
+
+    if( sent_message.lower() == "?" or sent_message.lower() == "'?'" ):
+        message = """To search on wikipedia, enter one of the following commands:
+  search 'query',
+  summary 'query',
+  content 'query',
+  url 'query'.
+Please note that text over 1000 characters will be split into multiple messages."""
+    elif( context.lower() == "search" ):
+        message = wikipedia.search(query)
+    elif( context.lower() == "summary" ):
+        message = wikipedia.summary(query)
+    elif( context.lower() == "content" ):
+        message = wikipedia.page(query).content
+    elif( context.lower() == "url" ):
+        message = wikipedia.page(query).url
+    else:
+        message = "Invalid query. Type '?' for help."
+
+    while( len(message) != 0 ):
+        resp.message(message[:1000])
+        message = message[1000:]
  
     return str(resp)
  
