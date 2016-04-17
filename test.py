@@ -6,9 +6,9 @@ import wikia
 import requests
 import time
 
-ACC_SID = "AC7012eb334ad3587d202faede0290ccc3"
-AUTH_TOKEN = "b787bc83f51ce068eaf36046866993c8"
-PHONE_NUMBER "+15005550006"
+ACC_SID = "ACed1b65ad317350e920c04725943333fc"#CHECK YOUR LIVE ACC_SID
+AUTH_TOKEN = "068a74b108b5690c634b8e03e4e6d577"#CHECK YOUR LIVE AUTH_TOKEN
+PHONE_NUMBER = "+19177460878" #YOUR NUMBER
 
 ERROR = "Ambiguous query. Please use the search command if you cannot find your query."
 
@@ -95,7 +95,7 @@ def wiki_a(wiki, context, query):
                 message = "Unable to grab the section text."
         except:
             message = ERROR
-    elif( context.lower() == "content" ):
+    elif( context.lower() == "full" ):
         try:
             message = wikia.page(wiki, query).content
         except:
@@ -114,14 +114,14 @@ def wiki_a(wiki, context, query):
 def get_wiki():
     sent_message = request.values.get('Body', None)
     resp = twilio.twiml.Response()
-
+    print("initializing")
     # Initialize
     args = sent_message.split(" ",2);
     wiki = args[0]
     context = ""
     query = ""
     message = ""
-
+   
     # If the user only types one word, this catches it and won't break the script
     if( len(args) > 1 ):
         context = args[1]
@@ -156,22 +156,23 @@ Please note that text over 1000 characters will be split into multiple messages.
             message = wiki_a(wiki, context, query)
         except:
             message = "Invalid wiki. Type '?' for help."
-
-    # Cuts messages so that they don't exceel twilio MMS 1600 character limit.
-    while( len(message) != 0 ):
-        # 1280 is 160 (max SMS message) times 8.
-        resp.message(message[:1280])
-        message = message[1280:]
+    print("before while loop")
     client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
-    
-    sms = client.messages.create(
-    to=request.values.get('From', None), 
-    from_=PHONE_NUMBER, 
-    body="testing", 
-    )
-    print(sms.sid)
-    time.sleep(1)
-
+    # Cuts messages so that they don't exceel twilio MMS 1600 character limit.
+    while( len(message) > 1280 ):
+        # 1280 is 160 (max SMS message) times 8.
+        client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
+        sms = client.messages.create(
+            to=request.values.get('From', None), 
+            from_=PHONE_NUMBER, 
+            body=message[:1280], 
+        )
+        message = message[1280:]
+        print(sms.sid)
+        print("long message")
+        time.sleep(30)
+    print("Returning")
+    resp.message(message)    
     return str(resp)
  
 if __name__ == "__main__":
