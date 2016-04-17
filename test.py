@@ -1,7 +1,10 @@
 from flask import Flask, request, redirect
 import twilio.twiml
 import wikipedia
- 
+
+ERROR = "Invalid query, please retry"
+
+
 app = Flask(__name__)
  
 @app.route("/", methods=['GET', 'POST'])
@@ -26,11 +29,20 @@ Please note that text over 1000 characters will be split into multiple messages.
     elif( context.lower() == "search" ):
         message = wikipedia.search(query)
     elif( context.lower() == "summary" ):
-        message = wikipedia.summary(query)
+        try:
+            message = wikipedia.summary(query)
+        except:
+            message = ERROR
     elif( context.lower() == "content" ):
-        message = wikipedia.page(query).content
+        try:
+            message = wikipedia.page(query).content
+        except:
+            message = ERROR
     elif( context.lower() == "url" ):
-        message = wikipedia.page(query).url
+        try:
+            message = wikipedia.page(query).url
+        except:
+            message = ERROR
     else:
         message = "Invalid query. Type '?' for help."
 
