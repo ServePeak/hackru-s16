@@ -4,9 +4,9 @@ from twilio.rest import TwilioRestClient
 import wikipedia
 import wikia
 
-ACC_SID = "AC238972a7fc7248f34ba8c582cab28719"#CHECK YOUR LIVE ACC_SID
-AUTH_TOKEN = "0f7a5a8777245c2cfa5f689e35cc369c"#CHECK YOUR LIVE AUTH_TOKEN
-PHONE_NUMBER = "+18722100008" #YOUR NUMBER
+ACC_SID = "AC6f6a9dd829c0b0ac45030ba3b0d5a05d"#CHECK YOUR LIVE ACC_SID
+AUTH_TOKEN = "670a2fb01d2361e03f330c7265cdd18e"#CHECK YOUR LIVE AUTH_TOKEN
+PHONE_NUMBER = "+4697700002" #YOUR NUMBER
 
 ERROR = "Ambiguous query. Please use the search command if you cannot find your query."
 
@@ -36,7 +36,7 @@ def wiki_pedia(context, query):
             for i, x in enumerate(sec_list[1:]):
                 message += ",  \n" + x + " (" + str(i+2) + ")"
         except:
-            message = "poop"
+            message = ERROR
     elif( context.lower() == "section" ):
         try:
             # Uses the secton number to return query
@@ -186,6 +186,9 @@ Please note that text over 1000 characters will be split into multiple messages.
             message = wiki_a(wiki, context, query)
         except:
             message = "Invalid wiki. Type '?' for help."
+
+    if( context.lower() == "image"):
+        return str(resp)
 
     #client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
     # Cuts messages so that they don't exceel twilio MMS 1600 character limit.
