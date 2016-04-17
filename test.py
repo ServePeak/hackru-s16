@@ -10,13 +10,14 @@ def get_wiki():
     sent_message = request.values.get('Body', None)
     args = sent_message.split(" ",1);
     if (args[0].lower() == "search"):
-        message = wikipedia.search(args[1])
-    else if (args[0].lower() == "content"):
+        result = wikipedia.search(args[1])
+        message = '\n'.join(result)
+    #need to send over 150chars
+    elif (args[0].lower() == "content"):
+        message = wikipedia.page(args[1]).content
+    elif (args[0].lower() == "url"):
         page = wikipedia.page(args[1])
-		message = page.url
-    else if (args[0].lower() == "url"):
-        page = wikipedia.page(args[1])
-		message = page.url
+        message = page.url
     else:
         #default sends back summary of the search
 		message = wikipedia.summary(sent_message)
