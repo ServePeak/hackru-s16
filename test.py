@@ -1,7 +1,14 @@
 from flask import Flask, request, redirect
 import twilio.twiml
+from twilio.rest import TwilioRestClient
 import wikipedia
 import wikia
+import requests
+import time
+
+ACC_SID = "AC7012eb334ad3587d202faede0290ccc3"
+AUTH_TOKEN = "b787bc83f51ce068eaf36046866993c8"
+PHONE_NUMBER "+15005550006"
 
 ERROR = "Ambiguous query. Please use the search command."
 
@@ -70,7 +77,16 @@ Please note that text over 1000 characters will be split into multiple messages.
         #1280 is 160 (max SMS message) times 8. Maximum size of a twilio MMS is 1600 characters.
         resp.message(message[:1280])
         message = message[1280:]
- 
+    client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
+    
+    sms = client.messages.create(
+    to=request.values.get('From', None), 
+    from_=PHONE_NUMBER, 
+    body="testing", 
+    )
+    print(sms.sid)
+    time.sleep(1)
+
     return str(resp)
  
 if __name__ == "__main__":
