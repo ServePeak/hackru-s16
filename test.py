@@ -95,7 +95,7 @@ def wiki_a(wiki, context, query):
                 message = "Unable to grab the section text."
         except:
             message = ERROR
-    elif( context.lower() == "full" ):
+    elif( context.lower() == "content" ):
         try:
             message = wikia.page(wiki, query).content
         except:
@@ -156,22 +156,23 @@ Please note that text over 1000 characters will be split into multiple messages.
             message = wiki_a(wiki, context, query)
         except:
             message = "Invalid wiki. Type '?' for help."
-    print("before while loop")
-    client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
+    #client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
     # Cuts messages so that they don't exceel twilio MMS 1600 character limit.
+    i = 0
     while( len(message) > 1280 ):
         # 1280 is 160 (max SMS message) times 8.
         client = TwilioRestClient(ACC_SID, AUTH_TOKEN)
         sms = client.messages.create(
             to=request.values.get('From', None), 
             from_=PHONE_NUMBER, 
-            body=message[:1280], 
+            body=message[:1280]+ "\n PAGE: " + str(i+1), 
         )
         message = message[1280:]
-        print(sms.sid)
-        print("long message")
-        time.sleep(30)
+        print(str(i+1))
+        i+=1#time.sleep(60)
     print("Returning")
+    if (i > 0):
+        message += "\n LAST PAGE"
     resp.message(message)    
     return str(resp)
  
