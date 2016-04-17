@@ -2,7 +2,7 @@ from flask import Flask, request, redirect
 import twilio.twiml
 import wikipedia
 
-ERROR = "Please use one the search command."
+ERROR = "Ambiguous Query. Please use the search command"
 
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ def get_wiki():
   url 'query'.
 Please note that text over 1000 characters will be split into multiple messages."""
     elif( context.lower() == "search" ):
-        message = "\n".join(wikipedia.search(query))
+        message = ",  \n".join(wikipedia.search(query))
     elif( context.lower() == "summary" ):
         try:
             message = wikipedia.summary(query)
