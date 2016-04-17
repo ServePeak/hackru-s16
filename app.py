@@ -143,6 +143,7 @@ def wiki_a(wiki, context, query):
  
 @app.route("/", methods=['GET', 'POST'])
 def get_wiki():
+    resp = twiml.Response()
     sent_message = request.values.get('Body', None)
 
     # Initialize
